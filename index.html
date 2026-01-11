@@ -1,0 +1,104 @@
+<?php
+// ================= CONEXÃO =================
+$conn = new mysqli("localhost", "root", "", "gestao_escolar_angola");
+if ($conn->connect_error) {
+    die("Erro de conexão");
+}
+
+// ================= CADASTRAR ALUNO =================
+if (isset($_POST['cadastrar_aluno'])) {
+    $nome = $_POST['nome'];
+    $classe = $_POST['classe'];
+    $turno = $_POST['turno'];
+    $telefone = $_POST['telefone'];
+
+    $conn->query("INSERT INTO alunos (nome, classe, turno, telefone)
+                  VALUES ('$nome','$classe','$turno','$telefone')");
+}
+
+// ================= PAGAR PROPINA =================
+if (isset($_POST['pagar_propina'])) {
+    $aluno = $_POST['aluno_id'];
+    $mes = $_POST['mes'];
+    $valor = $_POST['valor'];
+
+    $conn->query("INSERT INTO propinas (aluno_id, mes, valor, estado)
+                  VALUES ('$aluno','$mes','$valor','Pago')");
+}
+?>
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Gestão Escolar - Angola</title>
+    <style>
+        body { font-family: Arial; background: #f2f2f2; padding: 20px; }
+        h2 { background: #003366; color: white; padding: 10px; }
+        form { background: white; padding: 15px; margin-bottom: 20px; }
+        input, select, button { width: 100%; padding: 8px; margin: 5px 0; }
+        table { width: 100%; background: white; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        th { background: #ddd; }
+        button { background: green; color: white; border: none; }
+    </style>
+</head>
+<body>
+
+<h2>📘 Sistema de Gestão Escolar (Angola)</h2>
+
+<!-- ================= CADASTRO DE ALUNO ================= -->
+<form method="POST">
+    <h3>👨‍🎓 Cadastrar Aluno</h3>
+    <input type="text" name="nome" placeholder="Nome do aluno" required>
+    <input type="text" name="classe" placeholder="Classe (Ex: 7ª, 10ª, 12ª)" required>
+    <select name="turno">
+        <option>Manhã</option>
+        <option>Tarde</option>
+        <option>Noite</option>
+    </select>
+    <input type="text" name="telefone" placeholder="Telefone">
+    <button name="cadastrar_aluno">Cadastrar</button>
+</form>
+
+<!-- ================= PAGAMENTO DE PROPINA ================= -->
+<form method="POST">
+    <h3>💰 Pagar Propina</h3>
+    <select name="aluno_id" required>
+        <option value="">Selecione o aluno</option>
+        <?php
+        $alunos = $conn->query("SELECT * FROM alunos");
+        while ($a = $alunos->fetch_assoc()) {
+            echo "<option value='{$a['id']}'>{$a['nome']}</option>";
+        }
+        ?>
+    </select>
+    <input type="text" name="mes" placeholder="Mês (Ex: Janeiro)" required>
+    <input type="number" name="valor" placeholder="Valor em Kz" required>
+    <button name="pagar_propina">Registrar Pagamento</button>
+</form>
+
+<!-- ================= LISTA DE ALUNOS ================= -->
+<h3>📋 Lista de Alunos</h3>
+<table>
+    <tr>
+        <th>Nome</th>
+        <th>Classe</th>
+        <th>Turno</th>
+        <th>Telefone</th>
+    </tr>
+    <?php
+    $res = $conn->query("SELECT * FROM alunos");
+    while ($row = $res->fetch_assoc()) {
+        echo "<tr>
+                <td>{$row['nome']}</td>
+                <td>{$row['classe']}</td>
+                <td>{$row['turno']}</td>
+                <td>{$row['telefone']}</td>
+              </tr>";
+    }
+    ?>
+</table>
+
+</body>
+</html>
